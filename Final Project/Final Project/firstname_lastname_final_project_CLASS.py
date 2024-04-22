@@ -24,8 +24,8 @@ class App:
         self.name = name
         self.developer = developer
         self.description = description
-        self.price = price
-        self.rating = rating
+        self._price = price
+        self._rating = rating
         self.review_count = review_count
         self.category = category
 
@@ -43,16 +43,55 @@ class App:
             App.ratings_dict[rating_key] = [self]
 
         # Save apps to price dictionary
-        price_key = f"${price:.2f}"
+        price = row[4]
+        if price == 'Free':
+            price_key = "$0.00"
+        else:
+            price_key = f"${float(price):.2f}"
         if price_key in App.price_dict:
             App.price_dict[price_key].append(self)
         else:
             App.price_dict[price_key] = [self]
 
+    @property
+    def price(self):
+        return self._price
+
+    @price.setter
+    def price(self, value):
+        self._price = value
+
+        # Update price_dict
+        price_key = f"${value:.2f}"
+        if price_key in App.price_dict:
+            App.price_dict[price_key].remove(self)
+            App.price_dict[price_key].append(self)
+        else:
+            App.price_dict[price_key] = [self]
+
+    @property
+    def rating(self):
+        return self._rating
+
+    @rating.setter
+    def rating(self, value):
+        self._rating = value
+
+        # Update ratings_dict
+        rating_key = round(float(value), 1)
+        if rating_key in App.ratings_dict:
+            App.ratings_dict[rating_key].remove(self)
+            App.ratings_dict[rating_key].append(self)
+        else:
+            App.ratings_dict[rating_key] = [self]
+
+    def get_categories(self):
+        return {category: self for category in self.category.split("|")}
+
 # Initialize dictionaries
-App.category_dict = {}
-App.ratings_dict = {}
-App.price_dict = {}
+App.category_dict = defaultdict(list)
+App.ratings_dict = defaultdict(list)
+App.price_dict = defaultdict(list)
 
 # Process CSV file
 with open("Top50ShopifyApps.csv") as csvfile:
@@ -63,32 +102,35 @@ with open("Top50ShopifyApps.csv") as csvfile:
         App(id, name, developer, description, price, rating, review_count, category)
 
 
-# process file
-filename = 'Top50ShopifyApps.csv'
-with open(filename) as fin:
-    reader = csv.reader(fin)
-    next(reader)  # skip header
-    for row in reader:
-        ID, name, developer, description, price, rating, review_count, category = row
-        App(ID, name, developer, description, price, rating, review_count, category)
-
-
-# define a Cart class
 class Cart:
     def __init__(self):
         self.items = []
 
     def subtotal(self):
-        return sum(item.get_price() for item in self.items)
+        return sum(item.price for item in self.items)
 
     def add_item(self, app):
         if app not in self.items:
             self.items.append(app)
 
-    def append(self, app1):
-        pass
+    def remove_item(self, app):
+       if app in self.items:
+            self.items.remove(app)
+
+    def display_items(self):
+        for item in self.items:
+            print(f"{item.name} ({item.developer}) - ${item.price} - Rating: {item.rating}")
 
 
+# Testing code to check object creating Items
+# Uncomment to test and then
+# Comment out when done
+
+# cart = Cart()
+# for app in App.category_dict["Marketing"]:
+#     cart.add_item(app)
+# cart.display_items()
+# print(f"Subtotal: ${cart.subtotal()}")
 
 '''Testing code to check object creating Items
 Uncomment to test and then

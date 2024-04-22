@@ -2,10 +2,8 @@ import random  # used in random receipt no function
 import string
 from functools import partial
 from logging import root
-from tkinter import *
 import tkinter as tk
-from firstname_lastname_final_project_CLASS2 import Cart, App
-
+from firstname_lastname_final_project_CLASS import Cart, App
 
 # define a MyFrame class
 class MyFrame(tk.Frame):
@@ -58,7 +56,7 @@ class MyFrame(tk.Frame):
             row = 0
             for item in current_items:
                 self.states.append(tk.IntVar())
-                chk = tk.Checkbutton(self, text=item.name, variable=self.states[row])
+                chk = tk.Checkbutton(self, text=item.name, variable=self.states[row], command=partial(self.add_to_cart, item))
                 chk.grid(row=row, column=0)
 
                 tk.Label(self, text="$" + str(item.price)).grid(row=row, column=1)
@@ -67,8 +65,9 @@ class MyFrame(tk.Frame):
 
                 row += 1
 
-            tk.Button(self, text="Add to Cart", command=partial(self.add_to_cart, current_items)).grid(row=len(current_items) + 1, column=0)
-            tk.Button(self, text="Go Back", command=self.welcome).grid(row=len(current_items) + 2, column=0)
+            tk.Label(self, textvariable=self.data).grid(row=row + 1, column=0, columnspan=4)
+            tk.Button(self, text="Add to Cart", command=self.add_to_cart_multiple).grid(row=row + 2, column=0)
+            tk.Button(self, text="Go Back", command=self.welcome).grid(row=row + 3, column=0)
 
     def shop_by_ratings(self, rating=None):
         self.clear_frame()
@@ -76,7 +75,7 @@ class MyFrame(tk.Frame):
 
         if rating is None:
             ratings = [i / 2 for i in range(1, 10)]
-            Choose_Rating_Label = tk.Label(self, text="Choose Rating: ")
+            Choose_Rating_Label= tk.Label(self, text="Choose Rating: ")
             Choose_Rating_Label.grid(row=0, column=0)
 
             for rating in ratings:
@@ -91,7 +90,7 @@ class MyFrame(tk.Frame):
             row = 0
             for item in current_items:
                 self.states.append(tk.IntVar())
-                chk = tk.Checkbutton(self, text=item.name, variable=self.states[row])
+                chk = tk.Checkbutton(self, text=item.name, variable=self.states[row], command=partial(self.add_to_cart, item))
                 chk.grid(row=row, column=0)
 
                 tk.Label(self, text="$" + str(item.price)).grid(row=row, column=1)
@@ -100,8 +99,9 @@ class MyFrame(tk.Frame):
 
                 row += 1
 
-            tk.Button(self, text="Add to Cart", command=partial(self.add_to_cart, current_items)).grid(row=len(current_items) + 1, column=0)
-            tk.Button(self, text="Go Back", command=self.welcome).grid(row=len(current_items) + 2, column=0)
+            tk.Label(self, textvariable=self.data).grid(row=row + 1, column=0, columnspan=4)
+            tk.Button(self, text="Add to Cart", command=self.add_to_cart_multiple).grid(row=row + 2, column=0)
+            tk.Button(self, text="Go Back", command=self.welcome).grid(row=row + 3, column=0)
 
     def shop_by_price(self, price_range=None):
         self.clear_frame()
@@ -122,7 +122,7 @@ class MyFrame(tk.Frame):
             row = 0
             for item in current_items:
                 self.states.append(tk.IntVar())
-                chk = tk.Checkbutton(self, text=item.name, variable=self.states[row])
+                chk = tk.Checkbutton(self, text=item.name, variable=self.states[row], command=partial(self.add_to_cart, item))
                 chk.grid(row=row, column=0)
 
                 tk.Label(self, text="$" + str(item.price)).grid(row=row, column=1)
@@ -131,13 +131,18 @@ class MyFrame(tk.Frame):
 
                 row += 1
 
-            tk.Button(self, text="Add to Cart", command=partial(self.add_to_cart, current_items)).grid(row=len(current_items) + 1, column=0)
-            tk.Button(self, text="Go Back", command=self.welcome).grid(row=len(current_items) + 2, column=0)
+            tk.Label(self, textvariable=self.data).grid(row=row + 1, column=0, columnspan=4)
+            tk.Button(self, text="Add to Cart", command=self.add_to_cart_multiple).grid(row=row + 2, column=0)
+            tk.Button(self, text="Go Back", command=self.welcome).grid(row=row + 3, column=0)
 
-    def add_to_cart(self, current_items):
-        for i in range(len(current_items)):
+    def add_to_cart(self, item):
+        self.cart.add_item(item)
+        self.data.set(f"Subtotal: ${self.cart.subtotal():.2f}")
+
+    def add_to_cart_multiple(self):
+        for i in range(len(self.states)):
             if self.states[i].get() == 1:
-                self.cart.add_item(current_items[i])
+                self.cart.add_item(App.all_apps[i])
 
         self.data.set(f"Subtotal: ${self.cart.subtotal():.2f}")
 
